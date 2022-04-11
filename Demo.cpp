@@ -43,7 +43,6 @@ int main() {
   /* prints [6 0 0]
             [0 6 0]
             [0 0 6]*/
-
   cout << "End of demo!" << endl;
   return 0;
 }
