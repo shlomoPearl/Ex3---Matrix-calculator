@@ -4,8 +4,10 @@
 #include <sstream>
 #include "Matrix.hpp"
 #include <stdexcept>
+#include <cmath>
 const int IS_NUMBER_UP_BORDER = 9;
 const int IS_NUMBER_LOW_BORDER = 0;
+const int BASE = 10;
 using namespace std;
 namespace zich{
     Matrix::Matrix(const vector<double>& vec , int row, int column){
@@ -42,6 +44,32 @@ namespace zich{
             sum += mat.v.at(i);
         }
         return sum;
+    }
+    bool isNumber(const char c){
+        bool ans = c - '0' <= IS_NUMBER_UP_BORDER && c - '0' >= IS_NUMBER_LOW_BORDER;
+        return ans;        
+    }
+    int getFractionPoint(const string& s){
+        for (uint i = 0; i < s.size(); i++){
+            if (s.at(i) == '.'){
+                return (int)i;
+            }
+        }
+        return s.size();
+    }
+
+    double stringToNumber(const string& s){
+        double  num = 0;
+        int point = getFractionPoint(s);  /// 1
+        for (uint i = 0; i < point; i++){
+            int current = s.at(i) - '0';
+            num += (current * pow (BASE, (uint)point -1 - i));
+        }
+        for (int i = 0; i < (int)s.size() - point - 1; i++){
+            int current = s.at((uint)i) - '0';
+            num += (current * pow (BASE, -1 - (int)i));
+        }
+        return num;
     }
 
     // #### math operators ####
@@ -215,12 +243,14 @@ namespace zich{
         *this = *this * other;
         return *this;
     }
-    //input and output operator
+    //output operator
     ostream& operator<< (ostream& output, const Matrix& c){
         string out;
         uint i = 1;
+        // take care on marix with 1 row 
         if (c.row == 1){
             out += '[';
+            // s is needed for the cast from the matrix to string will be in good format
             ostringstream s;
             for (uint i = 0; i < c.column - 1; i++){
                 s << c.v.at(i);
@@ -233,9 +263,11 @@ namespace zich{
             out += ']';
             return output << out;
         }
+        // take care on marix with 1 column
         if (c.column ==1){
             for(uint i = 0; i < c.row - 1; i++){
                 out += '[';
+                // s is needed for the cast from the matrix to string will be in good format
                 ostringstream s;
                 s << c.v.at(i);
                 out += s.str();
@@ -249,80 +281,84 @@ namespace zich{
             out += ']';
             return output << out;
         }
-        
+        // the genral case when M is matrix nXk such that n >= 2 ,k >=2
         while (i <= c.v.size()){
-            if (i % (uint)c.column != 0){
-                if( i % (uint)c.column == 1){
+            if (i % (uint)c.column != 0){  // Go through the whole line except the last element
+                if( i % (uint)c.column == 1){  // start of line
                     out += '[';
                 }
+                // s is needed for the cast from the matrix to string will be in good format
                 ostringstream s;
                 s << c.v.at(i -1);
                 out += s.str();
                 out += ' ';
             }else{
+                // s is needed for the cast from the matrix to string will be in good format
                 ostringstream s;
-                s << c.v.at(i -1);
+                s << c.v.at(i -1); // this is the last element in this line
                 out += s.str();
                 if(i != c.v.size()){
-                    out +=  "]\n";
+                    out +=  "]\n";  // end of line
                 }else{
-                    out += "]";
+                    out += "]";  // end of matrix
                 }
             }
             i++;
         }
-        
         return (output << out);
     }
-
-    istream& operator>> (istream& input, Matrix& c) {
+    // input operator
+    istream& operator>> (istream& input, Matrix& c) { 
+        string st;
+        getline(input , st);
         uint i = 0;
-        int lengthRow = 0;
-        int lengthColumn = 0;
+        int row = 0;
+        int column = 0;
         bool startOfRow = true;
-        bool commaSpace = true;
-        char current = 0;
-        input >> noskipws;
-        while (input >> current && current != '\n'){
-            if (current == '[') {
-                if (!startOfRow){
-                    throw ("iilegal input");
+        bool onePoint = true;
+        while (i < st.size()) {
+            if (st.at(i) == '[') {
+                if (!startOfRow) {
+                    throw ("invalid input 1");
                 }
-                if (!commaSpace) { 
-                    throw ("iilegel input");
-                }
+                row++;
                 startOfRow = false;
-                commaSpace = false;
-                lengthColumn ++;
             }
-            if (current == ']') {
+            if (st.at(i) == ']') {
                 if (startOfRow) {
-                    throw ("iilegel input");
+                    throw ("invalid input 2");
                 }
                 startOfRow = true;
             }
-            if (current == ',') {
-                if(!startOfRow){
-                    throw ("iilegel input");
-                }
-                input >> current;
-                if (current != ' ') {
-                    throw ("iilegel input");
-                }
-                commaSpace = true;
-                
-                
-
+            if (st.at(st.size() - 1 ) != ']') {
+                throw ("invalid input 3");
             }
-            if (current - '0' >= IS_NUMBER_LOW_BORDER && current - '0' <= IS_NUMBER_UP_BORDER) {
-                double num = current - '0';
-                c.v.push_back(num);    
+            
+            if (st.at(i) == ',') {
+                if (st.at(i+1) != ' ') {
+                    throw ("invalid input 4");
+                }
             }
-            input >> current;
-        }
-        // string s;
-        // char current = 0;
-        // cin >> noskipws;
+            if (isNumber(st.at(i))) {
+                string numString;
+                onePoint = true;
+                numString += st.at(i);
+                i++;
+                while (i < st.size() && (isNumber(st.at(i)) || st.at(i) == '.') ){
+                    if (st.at(i) == '.' && (!onePoint || !isNumber(st.at(i+1)))){
+                        throw ("invalid input");
+                    }
+                    if (onePoint && st.at(i) == '.'){
+                        onePoint = false;
+                    }
+                    numString += st.at(i);
+                    i++;
+                }// while
+                double num = stringToNumber(numString);
+                c.v.push_back(num);
+            }            
+            i++;
+        }// while
         return input;
     }
 
