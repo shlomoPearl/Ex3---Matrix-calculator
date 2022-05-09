@@ -11,7 +11,7 @@ namespace zich{
         int column;
         vector<double> v;
     public:
-        Matrix(vector<double> v,int row,int column);
+        Matrix(const vector<double>& v,int row,int column);
         Matrix(const Matrix& other); // copy constructor
         // : v(v),row(row),column(column){}
         // ~Matrix();
@@ -52,8 +52,4 @@ namespace zich{
     friend ostream& operator<< (std::ostream& output, const Matrix&); // output
     friend std::istream& operator>> (std::istream& input , Matrix& ); // input
     };
-
-   
-    
-    
 }
