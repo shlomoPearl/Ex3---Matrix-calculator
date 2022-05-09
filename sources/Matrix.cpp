@@ -345,6 +345,7 @@ namespace zich{
                 double num = stringToNumber(numString);
                 c.v.push_back(num);  
             }
+            // count the element in each line. this is the column number
             if (st.at(i) == ' ' && !startOfRow) {
                 column++;
             }
