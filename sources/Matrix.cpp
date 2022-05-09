@@ -25,7 +25,8 @@ namespace zich{
         this->column = other.column;
     }
     /*
-    this func get two marix and check if mult is defined on them
+    this func get two marix and check if mult add and sub is defined on them.
+    the bool flag is to divide between the cases of mult and sub or add
     */
     void checkDefine(const Matrix& a ,const Matrix& b , bool flag){
         if(flag){
@@ -45,10 +46,13 @@ namespace zich{
         }
         return sum;
     }
+    // check if this char represent number
     bool isNumber(const char c){
         bool ans = c - '0' <= IS_NUMBER_UP_BORDER && c - '0' >= IS_NUMBER_LOW_BORDER;
         return ans;        
     }
+    // check if there is this number that represent by the string is fraction number
+    // return point index
     int getFractionPoint(const string& s){
         for (uint i = 0; i < s.size(); i++){
             if (s.at(i) == '.'){
@@ -57,7 +61,8 @@ namespace zich{
         }
         return s.size();
     }
-
+    // cast string  that represent number to real number
+    // return the cast number
     double stringToNumber(const string& s){
         double  num = 0;
         int point = getFractionPoint(s);  /// 1
@@ -73,11 +78,11 @@ namespace zich{
     }
 
     // #### math operators ####
-    // unary
+    // unary- return copy of the matrix
     Matrix Matrix::operator+()const{
         return Matrix(*this);
     }
-    // unary
+    // unary- return copy of the matrix with minus on all the element 
     Matrix Matrix::operator-()const{
         Matrix copy = Matrix(*this);
         // change all values to minus
@@ -90,7 +95,7 @@ namespace zich{
         }
         return copy;
     } 
-
+    // binary- return copy matrix represent the '+' between 2 matrix
     Matrix Matrix::operator+(const Matrix& other){
         checkDefine(*this , other, false);
         Matrix copy = Matrix(*this);
@@ -100,15 +105,13 @@ namespace zich{
         return copy;
         
     }
+    // return reference to this matrix with add of element in other matrix
     Matrix& Matrix::operator+=(const Matrix& other){
-        checkDefine(*this, other, false); //in case its on matrix
-        // for (uint i = 0; i < this->v.size(); i++){
-        //     // this->v.at(i) += scalar;
-        // }
+        checkDefine(*this, other, false); 
         *this = *this + other;
         return *this;
-        
     }
+    // // binary- return copy matrix represent the '-' between 2 matrix
     Matrix Matrix::operator-(const Matrix& other){
         checkDefine(*this, other, false);
         Matrix copy = Matrix(*this);
@@ -117,38 +120,43 @@ namespace zich{
         }
         return copy;
     }
-    //need to check if it on matrix or scalar
+    // return reference to this matrix with sub of element in other matrix
     Matrix& Matrix::operator-=(const Matrix& other){
-        checkDefine(*this, other, false); //in case its on matrix
-        // for (uint i = 0; i < this->v.size(); i++){
-        //     this->v.at(i) -= scalar;
-        // }
+        checkDefine(*this, other, false); 
         *this = *this - other;
         return *this;
     }
 
-    //comprasion operator
+    // #### comprasion operator ####
+    // all the compration operator are const because they don't change the objects
+
+    // return if sum of this matrix < other matrix
     bool Matrix::operator<(const Matrix& other)const{
         checkDefine(*this , other, false);
         bool ans = matrixSum(*this) < matrixSum(other);
         return ans;
     }
-
+    // return if sum of this matrix > other matrix
     bool Matrix::operator>(const Matrix& other)const{
         checkDefine(*this , other , false);
         bool ans = matrixSum(*this) > matrixSum(other);
         return ans;
     }
+    // return if sum of this matrix <= other matrix 
+    // implements by '!' on > operator
     bool Matrix::operator<=(const Matrix& other)const{
         checkDefine(*this , other, false);
-        bool ans = matrixSum(*this) <= matrixSum(other);
-        return ans;
+        bool ans = *this > other;
+        return !ans;
     }
+    // return if sum of this matrix >= other matrix 
+    // implements by '!' on < operator
     bool Matrix::operator>=(const Matrix& other)const{
         checkDefine(*this , other , false);
-        bool ans = matrixSum(*this) >= matrixSum(other);
-        return ans;
+        bool ans = *this < other;
+        return !ans;
     }
+    // return if matrix this[i][j] == other[i][j] for all i,j  
     bool Matrix::operator==(const Matrix& other)const{
         checkDefine(*this , other, false);
         bool eq = true;
@@ -159,27 +167,30 @@ namespace zich{
         }
         return eq;
     }
+    // return if matrix this[i][j] == other[i][j] for all i,j
+    // implementts by using '!' on == operator
     bool Matrix::operator!=(const Matrix& other)const{
         checkDefine(*this , other, false);
         return !(*this == other);
     }
 
-    //added operator
-    // prefix
+    // #### added operator ####
+    // prefix - increase the elements in 1 and than return refrence to this matrix
     Matrix& Matrix::operator++(){
         for (uint i = 0; i < this->v.size() ; i++){
             this->v.at(i)++;
         }
         return *this;
     } 
-    // prefix  
+    // prefix - decrease the elements in 1 and than return refrence to this matrix  
     Matrix& Matrix::operator--(){
         for (uint i = 0; i < this->v.size() ; i++){
             this->v.at(i)--;
         }
         return *this;
     }   
-    // postfix
+    // postfix - return copy of this and increase the elements of this in 1
+    // the dummy int is for the compiler will seperate between postfix and prefix
     Matrix Matrix::operator++(int dummy){ 
         Matrix copy = *this;
         for (uint i = 0; i < copy.v.size(); i++){
@@ -187,7 +198,8 @@ namespace zich{
         }
         return copy;       
     }   
-    // postfix
+    // postfix - return copy of this and  decrease the elements of this in 1
+    // the dummy int is for the compiler will seperate between postfix and prefix
     Matrix Matrix::operator--(int dummy){
         Matrix copy = *this;
         for (uint i = 0; i < copy.v.size(); i++){
@@ -197,7 +209,8 @@ namespace zich{
     }   
 
     // #### multiplye operator ####
-    // left mult
+
+    // left mult in scalar
     Matrix operator*(double scalar,const Matrix& mat){
         vector<double> copy (mat.v.size());
         for (uint i = 0; i < mat.v.size(); i++){
@@ -205,39 +218,56 @@ namespace zich{
         }
         return Matrix(copy, mat.row, mat.column);
     }
+    // right mult in scalar
+    // implement with left mult operator
     Matrix operator*(const Matrix& mat, double scalar){
         return scalar*mat;
     }
+    // mult the elements in scalar and return reference
+    // implement with right mult operator
     Matrix& Matrix::operator*=(double scalar){
-        for (uint i = 0; i < this->v.size(); i++){
-            this->v.at(i) *= scalar;
-        }
+        *this = *this * scalar;
         return *this;
     }
+    /*
+    @ return - copy matrix represent mult between two matrix
+    @ implements by 3 while loop and some variabels-
+    first while - all the elements of copy
+    second while - current row of this and column of other
+    third while - current element
+    p -> represent the copy element - make sur we pass all the copy marix values
+    row -> represent the row of this- make sure we pass all the row
+    joint -> length of column and row are the same
+    column -> make sure we pass through this row and othe column elements
+    row_index -> offset in current row
+    column_index -> offset in current column
+    */
     Matrix Matrix::operator*(const Matrix& other)const{
         checkDefine(*this , other, true);
         Matrix copy = Matrix(vector<double>(uint(this->row * other.column), 0),this->row,other.column);
         uint p = 0;
-        uint row = 0;
-        uint joint = (uint)other.row; // length of column and row
+        uint row = 0; 
+        uint joint = (uint)other.row; 
         while (p < copy.v.size()) {
-            uint column = 0;
-            while (column < other.column) {// column of other{
-                uint row_index = 0;
-                uint column_index = 0;
+            uint column = 0;  
+            while (column < other.column) {
+                uint row_index = 0; 
+                uint column_index = 0; 
                 while (row_index < joint) {
                     copy.v.at(p) += this->v.at(row_index + row) * other.v.at(column_index + column);
                     row_index++;
-                    column_index += (uint)other.column; // column of other
-                }
+                    column_index += (uint)other.column; 
+                } 
                 column++;
                 p++;
-            }
+            } 
             row += joint;
-        }
-
+        } 
         return copy;
     }
+    // mult the elements of this matrix in other matrix
+    // return reference
+    // implement with '*' operator on matrix
     Matrix& Matrix::operator*=(const Matrix& other){
         checkDefine(*this , other, true);
         *this = *this * other;
