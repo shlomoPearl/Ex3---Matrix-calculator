@@ -313,32 +313,20 @@ namespace zich{
         getline(input , st);
         uint i = 0;
         int row = 0;
-        int column = 0;
+        int column = 1;
         bool startOfRow = true;
-        bool onePoint = true;
+        bool onePoint = true; // for double number
+        int numberOfColumnUpdate = 0;
+        bool first = true;
         while (i < st.size()) {
             if (st.at(i) == '[') {
-                if (!startOfRow) {
-                    throw ("invalid input 1");
+                if (!startOfRow) {  // current line input doesn't finish
+                    throw invalid_argument("unexcepted argument1");
                 }
                 row++;
-                startOfRow = false;
-            }
-            if (st.at(i) == ']') {
-                if (startOfRow) {
-                    throw ("invalid input 2");
-                }
-                startOfRow = true;
-            }
-            if (st.at(st.size() - 1 ) != ']') {
-                throw ("invalid input 3");
+                startOfRow = false; // not except to '[' until ']'
             }
             
-            if (st.at(i) == ',') {
-                if (st.at(i+1) != ' ') {
-                    throw ("invalid input 4");
-                }
-            }
             if (isNumber(st.at(i))) {
                 string numString;
                 onePoint = true;
@@ -346,19 +334,43 @@ namespace zich{
                 i++;
                 while (i < st.size() && (isNumber(st.at(i)) || st.at(i) == '.') ){
                     if (st.at(i) == '.' && (!onePoint || !isNumber(st.at(i+1)))){
-                        throw ("invalid input");
+                        throw invalid_argument("invalid number");
                     }
                     if (onePoint && st.at(i) == '.'){
                         onePoint = false;
                     }
                     numString += st.at(i);
                     i++;
-                }// while
+                }// while of number
                 double num = stringToNumber(numString);
-                c.v.push_back(num);
-            }            
+                c.v.push_back(num);  
+            }
+            if (st.at(i) == ' ' && !startOfRow) {
+                column++;
+            }
+            if (st.at(i) == ']') {
+                if (startOfRow) { // current line input already finish
+                    throw invalid_argument("unexcepted argument2");
+                }
+                startOfRow = true;  // except to '['
+                if (!first && numberOfColumnUpdate != column ) {
+                    throw invalid_argument("diffrence between the column");
+                }
+                numberOfColumnUpdate = column;
+                first = false;
+                column = 1;
+            }
+            if (st.at(i) == ',') {  // The lines are separated with ', ' - comma and space
+                i++;
+                if (st.at(i) != ' ') {  
+                    throw invalid_argument("unexcepted argument4");
+                }
+            }       
             i++;
         }// while
+        // update the size
+        c.column = numberOfColumnUpdate;
+        c.row = row;
         return input;
     }
 
