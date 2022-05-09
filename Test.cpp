@@ -166,5 +166,12 @@ TEST_CASE("good input"){
         vector<double> pow = {4608,4608,4608,4608,4608,4608,4608,4608,4608};
         Matrix pow_m = {pow, 3,3};
         CHECK_EQ(true , m == pow_m);
+        vector<double> one = {1,1,1,1,1,1,1,1,1};
+        vector<double> four = {4,4,4,4,4,4,4,4,4};
+        Matrix one_m = {one, 3,3};
+        Matrix four_m = {four, 3,3};
+        double scalar = 0.5;
+        four_m = scalar * four_m * scalar;
+        CHECK_EQ(true, four_m == one_m);
     }
 }
