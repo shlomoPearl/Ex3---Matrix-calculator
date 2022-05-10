@@ -2,6 +2,7 @@
 #include "Matrix.hpp"
 #include <string>
 #include <iostream>
+#include <sstream>
 using namespace std;
 using namespace zich;
 
@@ -168,10 +169,27 @@ TEST_CASE("good input"){
         CHECK_EQ(true , m == pow_m);
         vector<double> one = {1,1,1,1,1,1,1,1,1};
         vector<double> four = {4,4,4,4,4,4,4,4,4};
-        Matrix one_m = {one, 3,3};
-        Matrix four_m = {four, 3,3};
+        Matrix one_m = {one, 3, 3};
+        Matrix four_m = {four, 3, 3};
         double scalar = 0.5;
         four_m = scalar * four_m * scalar;
         CHECK_EQ(true, four_m == one_m);
+        four_m *= 4608 ;
+        CHECK_EQ(true, four_m == pow_m);
+    }
+    SUBCASE("input operator"){
+        vector<double> identity_1 = {1 ,0 ,0 ,0 ,1 ,0 ,0 ,0 ,1};
+        vector<double> identity_2 = {1 ,0 ,0 ,1};
+        Matrix m_1 = {identity_1, 3, 3};
+        Matrix m_2 = {identity_2, 2, 2};
+        istringstream i_1{"[1 0 0], [0 1 0], [0 0 1]\n"};
+        CHECK_NOTHROW(i_1 >> m_2);
+        CHECK_EQ(true, m_1 == m_2);
+        istringstream i_2{"[1 0 ]0], [0 1 0], [0 0 1]\n"};
+        CHECK_THROWS(i_2 >> m_2);
+        istringstream i_3{"[1 0 0], [0 1], [0 0 1]\n"}; 
+        CHECK_THROWS(i_3 >> m_2);
+        istringstream i_4{"[1 0 0], [0 1 0], [0 0, 1]\n"};
+        CHECK_THROWS(i_4 >> m_2);
     }
 }

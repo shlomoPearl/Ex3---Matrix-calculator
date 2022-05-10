@@ -342,6 +342,7 @@ namespace zich{
         string st;
         getline(input , st);
         uint i = 0;
+        vector<double> _v;
         int row = 0;
         int column = 1;
         bool startOfRow = true;
@@ -373,7 +374,7 @@ namespace zich{
                     i++;
                 }// while of number
                 double num = stringToNumber(numString);
-                c.v.push_back(num);  
+                _v.push_back(num);  
             }
             // count the element in each line. this is the column number
             if (st.at(i) == ' ' && !startOfRow) {
@@ -399,12 +400,12 @@ namespace zich{
             }       
             i++;
         }// while
-        // update the size
+        // update the size and vector
+        c.v = _v;
         c.column = numberOfColumnUpdate;
         c.row = row;
         return input;
     }
-
 }
 
     
