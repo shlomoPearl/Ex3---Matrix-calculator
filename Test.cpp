@@ -192,4 +192,7 @@ TEST_CASE("good input"){
         istringstream i_4{"[1 0 0], [0 1 0], [0 0, 1]\n"};
         CHECK_THROWS(i_4 >> m_2);
     }
+    SUBCASE("output operator"){
+        
+    }
 }
